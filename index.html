@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <input type="text" id="openaiApiKey" placeholder="Your OpenAI API Key">
+
+    <div id="keyRequired">
+      <label for="ttsScript">What do you wan the AI to say?</label>
+      <textarea id="ttsScript">Hello there!</textarea>
+      <button id="playButton">Play</button>
+    </div>
+</head>
+<body>
+
+
+
+<script>
+  // Add click handler
+  document.getElementById('playButton').addEventListener('click', async () => {
+    try {
+      const response = await fetch('https://api.openai.com/v1/audio/speech', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + document.getElementById('openaiApiKey').value // Get API key from input field
+        },
+        body: JSON.stringify({
+          model: 'tts-1', // OpenAI text-to-speech model
+          input: document.getElementById('ttsScript').value, // Get text from textarea
+          voice: 'shimmer' // Voice option: alloy, echo, fable, onyx, nova, or shimmer
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const audioBlob = await response.blob();
+      const audioUrl = URL.createObjectURL(audioBlob);
+      const audio = new Audio(audioUrl);
+      audio.play();
+    } catch (error) {
+      console.error('Error making API call:', error);
+    }
+  });
+
+  // Hide the keyRequired div initially
+  const keyRequiredDiv = document.getElementById('keyRequired');
+  const apiKeyInput = document.getElementById('openaiApiKey');
+  keyRequiredDiv.style.display = 'none';
+
+  // Add input handler to show/hide based on API key
+  apiKeyInput.addEventListener('input', () => {
+    if (apiKeyInput.value.trim()) {
+      keyRequiredDiv.style.display = 'block';
+    } else {
+      keyRequiredDiv.style.display = 'none';
+    }
+  });
+</script>
+</body>
+
+<style>
+  #openaiApiKey {
+      width: 80%;
+      margin-top: 20px;
+      margin-bottom: 20px;
+      display: block;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      resize: vertical;
+      padding: 12px;
+  }
+  
+  textarea {
+      width: 80%;
+      height: 150px;
+      margin-top: 4px;
+      margin-bottom: 20px;
+      padding: 12px;
+      display: block;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      resize: vertical;
+  }
+
+  #playButton {
+    background-color: #4CAF50;
+    border: none;
+    color: white;
+    padding: 15px 32px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+  }
+
+  #playButton:hover {
+    background-color: #45a049;
+  }
+
+  #playButton:active {
+    background-color: #3d8b40;
+  }
+</style>
